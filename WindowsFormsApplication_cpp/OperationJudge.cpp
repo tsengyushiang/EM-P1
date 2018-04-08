@@ -24,10 +24,26 @@ int operandCount(std::string opr)
 	{
 		return 2;
 	}
+	else if ((opr == "Cross")||(opr=="Com")|| (opr == "Proj")|| (opr == "Area")||(opr == "isParallel")|| (opr == "isOrthogonal")||(opr == "angle")|| (opr == "pN"))
+	{
+		return 2;
+
+	}
+	//Matrix operators
 	else if ((opr == "Rank") || (opr == "trans")  || (opr == "det") || (opr == "Adj") || (opr == "Inverse") || (opr == "eigen") || (opr == "PM"))
 	{
 		return 1;
 	}
+	//Vector operators
+	else if ((opr=="Norm")|| (opr == "Normal"))
+	{
+		return 1;	
+	}
+	else if((opr == "Ob")|| (opr == "IsLI"))
+	{
+		return INT_MAX;
+	}
+
 	return 0;
 }
 
@@ -130,11 +146,11 @@ void calcMatrix(std::vector<Matrix>& tempOperationMatrixs,int& i, std::vector<st
 		}
 	
 	}
-	for (int count = 1; count <= operandCount(opr); count++)
+	for (int count = 1; count <= tempOperationMatrixs.size(); count++)
 	{
 		postfixCommand.erase(postfixCommand.begin() + i - count);
 	}
-	i -= (operandCount(opr) - 1);
+	i -= (tempOperationMatrixs.size() - 1);
 
 }
 
@@ -143,59 +159,133 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 	std::string opr = postfixCommand[i];
 	if (tempOperationVectors.size() == 1)
 	{
-		//執行運算
-		if (opr == "Rank")
+		if (opr == "Norm")
 		{
-			
+			resultVector = tempOperationVectors[0].Norm();
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		if (opr == "det")
+		if (opr == "Normal")
 		{
-			
+			resultVector = tempOperationVectors[0].Normal();
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		else if (opr == "trans")
-		{
-		
-		}
-		else if (opr == "Adj")
-		{
-			
-		}
-		else if (opr == "Inverse")
-		{
-			
-		}
-		else if (opr == "eigen")
-		{
-		
-		}
-		else if (opr == "PM")
-		{
 
-		}
 	}
 	else if (tempOperationVectors.size() == 2)
 	{
-		//執行運算 注意順序:matrix2-matrix1 
 		if (opr == "+")
 		{
-		
+			resultVector = tempOperationVectors[1] + tempOperationVectors[0];
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		else if (opr == "-")
+		if (opr == "*")
 		{
-			
+			resultVector = tempOperationVectors[1] * tempOperationVectors[0];
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		else if (opr == "*")
+		if (opr == "dot")
 		{
-			
+			resultVector = dot(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		else if (opr == "\\")
+		if (opr == "Cross")
 		{
-			
+			resultVector = Cross(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-		else if (opr == "LeastSquare")
+		if (opr == "Com")
 		{
-		
+			resultVector = Com(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
 		}
-	
+		if (opr == "Proj")
+		{
+			resultVector = Proj(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
+		}
+		if (opr == "Area")
+		{
+			resultVector = Area(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
+		}
+		if (opr == "isParallel")
+		{
+			bool Parallel = isParallel(tempOperationVectors[1], tempOperationVectors[0]);
+			if (Parallel)
+				postfixCommand[i] = "Yes";
+			else
+				postfixCommand[i] = "No";
+		}
+		if (opr == "isOrthogonal")
+		{
+			bool Orthogonal = isParallel(tempOperationVectors[1], tempOperationVectors[0]);
+			if (Orthogonal)
+				postfixCommand[i] = "Yes";
+			else
+				postfixCommand[i] = "No";
+		}
+		if (opr == "angle")
+		{
+			resultVector = angle(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
+		}
+		if (opr == "pN")
+		{
+			resultVector = pN(tempOperationVectors[1], tempOperationVectors[0]);
+			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			tempVectors.push_back(resultVector);
+			postfixCommand[i] = resultVector.Name;
+		}
 	}
+	else
+	{
+		if (opr == "IsLI")
+		{
+			bool IsLearnlyIndependent =IsLI(tempOperationVectors);
+			if (IsLearnlyIndependent)
+				postfixCommand[i] = "Yes";
+			else
+				postfixCommand[i] = "No";
+		}
+		if (opr == "Ob")
+		{
+			std::vector<Vector> result;
+			result = Ob(tempOperationVectors);
+
+			std::stringstream str;
+
+			for (Vector v : result)
+			{
+				str << v << "\r\n";
+			}
+
+			postfixCommand[i] = str.str();
+		}
+	}
+
+	for (int count = 1; count <= tempOperationVectors.size(); count++)
+	{
+		postfixCommand.erase(postfixCommand.begin() + i - count);
+	}
+	i -= (tempOperationVectors.size() - 1);
 }

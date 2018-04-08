@@ -1,5 +1,5 @@
 #include "DataManager.h"
-#include"sstream"
+
 Vector::Vector()
 {
 	Error = false;
@@ -24,108 +24,65 @@ Vector::Vector(std::vector<double>D)
 	}
 }
 
-double Dot(Vector &a, Vector &b)
+Vector operator +(Vector& a, Vector& b)
 {
-	
-		double ans=0;
-		for (int i = 0; i <a.Data.size(); i++)
-		{
-			ans += a.Data[i] * b.Data[i];
-		}
-		return ans;
-	
+	return Vector();
 }
-Vector Add(Vector &a, Vector &b)
+Vector operator *(Vector& a, Vector& b)
 {
-	std::vector<double>data;
-		double ans = 0;
-		for (int i = 0; i <a.Data.size(); i++)
-		{
-			data.push_back(a.Data[i] + b.Data[i]);
-		}
-		return Vector(data);
+	return Vector();
 }
-Vector ScarlarMul(Vector &a, Vector &b)
+Vector dot(Vector& a, Vector& b)
 {
-	std::vector<double>data;
-	if (a.Data.size() == 1)
-	{
-		for (int i = 0; i <b.Data.size(); i++)
-		{
-			data.push_back(a.Data[0] * b.Data[i]);
-		}
-	}
-	else if (b.Data.size() == 1)
-	{
-		for (int i = 0; i < a.Data.size(); i++)
-		{
-			data.push_back(a.Data[i] * b.Data[0]);
-		}
-	}
-	return Vector(data);
+	return Vector();
 }
-double Norm(Vector &a)
+Vector Vector::Norm()
 {
-	double ans = 0;
-	for (int i = 0; i <a.Data.size(); i++)
-	{
-		ans += a.Data[i] * a.Data[i];
-	}
-	return sqrt(ans);
+	return Vector();
 }
-Vector Normalize(Vector &a)
+Vector Vector::Normal()
 {
-	double nor = Norm(a);
-	std::vector<double>data;
-	for (int i = 0; i <a.Data.size(); i++)
-	{
-		data.push_back(a.Data[i] / nor);
-	}
-	return Vector(data);
+	return Vector();
 }
-Vector CrossProduct(Vector& a, Vector &b)
+Vector Cross(Vector& a, Vector& b)
 {
-	
-		std::vector<double>data;
-		data.push_back(a.Data[1] * b.Data[2]- a.Data[2] * b.Data[1]);
-		data.push_back(-a.Data[0] * b.Data[2]+a.Data[2] * b.Data[0]);
-		data.push_back(a.Data[0] * b.Data[1]-a.Data[1] * b.Data[0]);
-		return Vector(data);
+	return Vector();
 }
-double Component(Vector &a, Vector &b)
+Vector Com(Vector& a, Vector& b)
 {
-	return Dot(a, b) / Norm(b);
+	return Vector();
 }
-Vector Projection(Vector &a, Vector &b)
+Vector Proj(Vector& a, Vector& b)
 {
-	double k = Dot(a, a) / Dot(b, b);
-	std::vector<double>data;
-	for (int i = 0; i < a.Data.size(); i++)
-	{
-		data.push_back(b.Data[i] * k);
-	}
-	return Vector(data);
+	return Vector();
 }
-double TriArea(Vector &a,Vector &b)
+Vector Area(Vector& a, Vector& b)
 {
-	Vector k = CrossProduct(a, b);
-	return 0.5*Norm(k);
+	return Vector();
 }
-bool Parallel(Vector &a, Vector &b)
+bool isParallel(Vector& a, Vector& b)
 {
-	bool allzero = false;
-	Vector k = CrossProduct(a, b);
-	for (int i = 0; i <k.Data.size(); i++)
-	{
-		if (k.Data[i] == 0)
-		{
-			allzero = true;
-		}
-	}
-	if (allzero)
-		return 1;
-	else
-		return 0;
+	return true;
+}
+bool isOrthogonal(Vector& a, Vector& b)
+{
+	return true;
+}
+Vector angle(Vector& a, Vector& b)
+{
+	return Vector();
+}
+Vector pN(Vector& a, Vector& b)
+{
+	return Vector();
+}
+bool IsLI(std::vector<Vector>& vecotrs)
+{
+	return true;
+}
+std::vector<Vector> Ob(std::vector<Vector>& vecotrs)
+{
+	return std::vector<Vector>();
 }
 std::ostream& operator<<(std::ostream& output, Vector &a)
 {

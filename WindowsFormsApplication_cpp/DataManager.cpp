@@ -106,7 +106,8 @@ void DataManager::SetFileName(std::string fileName)
 
 std::string DataManager::ExeCommand(std::string command)
 {
-	const std::vector<std::string> unaryoperators = {"Rank","trans","det","Adj","Inverse","eigen","PM","LeastSquare" };
+	const std::vector<std::string> unaryoperators = {"Rank","trans","det","Adj","Inverse","eigen","PM","LeastSquare"\
+		,"Norm","Normal","Cross","Com","Proj","Area","isParallel","isOrthogonal","angle","pN","IsLI","Ob"};
 	const std::vector<std::string> binaryoperators = {"+","-","*","\\"};
 
 	std::string opr;	
@@ -219,6 +220,8 @@ std::string DataManager::ExeCommand(std::string command)
 			if (tempOperationMatrixs.size() == operandCount(postfixCommand[i]))
 				calcMatrix(tempOperationMatrixs, i, postfixCommand, tempMatrixs, resultMatrix);
 			else if (tempOperationVectors.size() == operandCount(postfixCommand[i]))
+				calcVector(tempOperationVectors, i, postfixCommand, tempVectors, resultVector);
+			else if(tempOperationVectors.size() != 0)//Ob
 				calcVector(tempOperationVectors, i, postfixCommand, tempVectors, resultVector);
 			else
 				return "Error";

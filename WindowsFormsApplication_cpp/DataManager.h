@@ -18,19 +18,27 @@ public:
 	Vector();
 	Vector(std::string n, std::vector<double>Data);
 	Vector(std::vector<double>Data);
-	friend double Dot(Vector&, Vector&);
-	friend Vector Add(Vector&, Vector&);
-	friend Vector ScarlarMul(Vector&, Vector&);
-	friend double Norm(Vector&);
-	friend Vector Normalize(Vector&);
-	friend Vector CrossProduct(Vector&, Vector&);
-	friend double Component(Vector&, Vector&);
-	friend Vector Projection(Vector&, Vector&);
-	friend double TriArea(Vector&, Vector&);
-	friend bool Parallel(Vector&, Vector&);
+	
 	friend std::ostream& operator <<(std::ostream&, Vector&);
 	friend std::istream& operator >>(std::istream&, Vector&);
 
+	// 如果結果為Scalar時就回傳只有一個元素的向量-記得設定SIZE 不然PRINT不出來
+
+	friend Vector operator +(Vector&, Vector&); 
+	friend Vector operator *(Vector&, Vector&); // Scalar Multi
+	friend Vector dot(Vector&, Vector&);
+	Vector Norm();
+	Vector Normal();
+	friend Vector Cross(Vector&, Vector&);
+	friend Vector Com(Vector&, Vector&);
+	friend Vector Proj(Vector&, Vector&);
+	friend Vector Area(Vector&, Vector&);
+	friend bool isParallel(Vector&, Vector&);
+	friend bool isOrthogonal(Vector&, Vector&);
+	friend Vector angle(Vector&, Vector&);
+	friend Vector pN(Vector&, Vector&);
+	friend bool IsLI(std::vector<Vector>&);
+	friend std::vector<Vector> Ob(std::vector<Vector>&);
 };
 //定義矩陣資料結構
 class Matrix
