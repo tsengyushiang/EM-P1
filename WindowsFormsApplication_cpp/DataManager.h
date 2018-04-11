@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES
 #include<vector>
 #include<iostream>
 #include<fstream>
@@ -18,14 +19,16 @@ public:
 	Vector();
 	Vector(std::string n, std::vector<double>Data);
 	Vector(std::vector<double>Data);
-	
+	Vector(double Num);
+	Vector(bool err);
 	friend std::ostream& operator <<(std::ostream&, Vector&);
 	friend std::istream& operator >>(std::istream&, Vector&);
 
 	// 如果結果為Scalar時就回傳只有一個元素的向量-記得設定SIZE 不然PRINT不出來
-
 	friend Vector operator +(Vector&, Vector&); 
+	friend Vector operator -(Vector&, Vector&);
 	friend Vector operator *(Vector&, Vector&); // Scalar Multi
+	friend Vector operator /(Vector&, double&);
 	friend Vector dot(Vector&, Vector&);
 	Vector Norm();
 	Vector Normal();
@@ -38,6 +41,7 @@ public:
 	friend Vector angle(Vector&, Vector&);
 	friend Vector pN(Vector&, Vector&);
 	friend bool IsLI(std::vector<Vector>&);
+	friend bool err(Vector&);
 	friend std::vector<Vector> Ob(std::vector<Vector>&);
 };
 //定義矩陣資料結構

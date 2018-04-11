@@ -120,7 +120,11 @@ std::string DataManager::ExeCommand(std::string command)
 	{	
 
 		// Unary operator
-		if (std::find(unaryoperators.begin(), unaryoperators.end(),temp) != unaryoperators.end())
+		if ((temp == "Norm") && (command[index] = 'a'))
+		{
+			temp += command[index];
+		}
+		else if (std::find(unaryoperators.begin(), unaryoperators.end(),temp) != unaryoperators.end())
 		{
 			while ((!oprstack.empty())&&(priority(oprstack.back()) >= priority(temp)))
 			{
@@ -131,7 +135,7 @@ std::string DataManager::ExeCommand(std::string command)
 			temp.clear();
 		}
 		// binary operator
-		if(std::find(binaryoperators.begin(), binaryoperators.end(), command.substr(index,1)) != binaryoperators.end())
+		else if(std::find(binaryoperators.begin(), binaryoperators.end(), command.substr(index,1)) != binaryoperators.end())
 		{
 			if(!temp.empty())
 			postfixCommand.push_back(temp);
@@ -158,6 +162,7 @@ std::string DataManager::ExeCommand(std::string command)
 				postfixCommand.push_back(oprstack.back());
 				oprstack.pop_back();
 			}
+			if(!oprstack.empty())
 			oprstack.pop_back();
 			temp.clear();
 		}
@@ -206,7 +211,7 @@ std::string DataManager::ExeCommand(std::string command)
 					if (GetVector(postfixCommand[i - index]).Error) return "Error";
 					tempOperationVectors.push_back(GetVector(postfixCommand[i - index]));
 				}
-				else
+				else if (postfixCommand[i - index].substr(1, 2) == "tm")
 				{
 					for (const Matrix& m : tempMatrixs)
 					{
@@ -214,7 +219,14 @@ std::string DataManager::ExeCommand(std::string command)
 							tempOperationMatrixs.push_back(m);
 					}
 				}
-
+				else if (postfixCommand[i - index].substr(1, 2) == "tv")
+				{
+					for (const Vector& v : tempVectors)
+					{
+						if (v.Name == postfixCommand[i - index])
+							tempOperationVectors.push_back(v);
+					}
+				}
 
 			}			
 			if (tempOperationMatrixs.size() == operandCount(postfixCommand[i]))

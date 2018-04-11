@@ -162,14 +162,14 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 		if (opr == "Norm")
 		{
 			resultVector = tempOperationVectors[0].Norm();
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "Normal")
 		{
 			resultVector = tempOperationVectors[0].Normal();
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
@@ -180,49 +180,49 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 		if (opr == "+")
 		{
 			resultVector = tempOperationVectors[1] + tempOperationVectors[0];
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "*")
 		{
 			resultVector = tempOperationVectors[1] * tempOperationVectors[0];
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "dot")
 		{
 			resultVector = dot(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "Cross")
 		{
 			resultVector = Cross(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "Com")
 		{
 			resultVector = Com(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "Proj")
 		{
 			resultVector = Proj(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "Area")
 		{
 			resultVector = Area(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
@@ -236,7 +236,7 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 		}
 		if (opr == "isOrthogonal")
 		{
-			bool Orthogonal = isParallel(tempOperationVectors[1], tempOperationVectors[0]);
+			bool Orthogonal = isOrthogonal(tempOperationVectors[1], tempOperationVectors[0]);
 			if (Orthogonal)
 				postfixCommand[i] = "Yes";
 			else
@@ -245,14 +245,14 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 		if (opr == "angle")
 		{
 			resultVector = angle(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
 		if (opr == "pN")
 		{
 			resultVector = pN(tempOperationVectors[1], tempOperationVectors[0]);
-			resultVector.Name = std::string("$tm") + std::to_string(tempVectors.size());
+			resultVector.Name = std::string("$tv") + std::to_string(tempVectors.size());
 			tempVectors.push_back(resultVector);
 			postfixCommand[i] = resultVector.Name;
 		}
@@ -268,7 +268,8 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 				postfixCommand[i] = "No";
 		}
 		if (opr == "Ob")
-		{
+		{			
+			std::reverse(tempOperationVectors.begin(), tempOperationVectors.end());
 			std::vector<Vector> result;
 			result = Ob(tempOperationVectors);
 
@@ -285,7 +286,7 @@ void calcVector(std::vector<Vector>& tempOperationVectors, int& i, std::vector<s
 
 	for (int count = 1; count <= tempOperationVectors.size(); count++)
 	{
-		postfixCommand.erase(postfixCommand.begin() + i - count);
+		postfixCommand.erase(postfixCommand.begin() + i-1);
+		i--;
 	}
-	i -= (tempOperationVectors.size() - 1);
 }
