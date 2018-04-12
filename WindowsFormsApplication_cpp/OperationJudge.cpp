@@ -133,6 +133,7 @@ void calcMatrix(std::vector<Matrix>& tempOperationMatrixs,int& i, std::vector<st
 		else if (opr == "\\")
 		{
 			resultMatrix = SolveLinarSystem(tempOperationMatrixs[1], tempOperationMatrixs[0]);
+			resultMatrix = resultMatrix.Transpose();
 			resultMatrix.Name = std::string("$tm") + std::to_string(tempMatrixs.size());
 			tempMatrixs.push_back(resultMatrix);
 			postfixCommand[i] = resultMatrix.Name;

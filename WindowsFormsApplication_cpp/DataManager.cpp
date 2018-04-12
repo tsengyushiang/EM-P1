@@ -120,7 +120,7 @@ std::string DataManager::ExeCommand(std::string command)
 	{	
 
 		// Unary operator
-		if ((temp == "Norm") && (command[index] = 'a'))
+		if ((temp == "Norm") && (command[index] == 'a'))
 		{
 			temp += command[index];
 		}
@@ -274,7 +274,7 @@ std::string DataManager::ExeCommand(std::string command)
 		str << GetMatrix(postfixCommand[0]);
 		return str.str();
 	}
-	else if (postfixCommand[0].substr(0, 1) == "$V")
+	else if (postfixCommand[0].substr(0, 1) == "$v")
 	{
 		str << GetVector(postfixCommand[0]);
 		return str.str();

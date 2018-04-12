@@ -329,8 +329,8 @@ Matrix SolveLinarSystem(const Matrix& a,const Matrix& b)
 	Matrix AugmentedMatrix;
 	Matrix result;
 
-	AugmentedMatrix.rowCount = a.rowCount;
-	AugmentedMatrix.colCount = a.colCount + 1;
+	AugmentedMatrix.rowCount = result.rowCount= a.rowCount;
+	AugmentedMatrix.colCount = result.colCount= a.colCount + 1;	
 
 	if ((a.colCount != b.rowCount) || (b.colCount != 1))
 	{
@@ -348,27 +348,72 @@ Matrix SolveLinarSystem(const Matrix& a,const Matrix& b)
 	}
 	AugmentedMatrix=AugmentedMatrix.RowReduction();
 
-	// check if rank< n
-	for (int index = 0; index < a.rowCount; index++)
+	int ZeroCount = AugmentedMatrix.rowCount-AugmentedMatrix.Rank();
+	
+	for (int i = 0; i < AugmentedMatrix.rowCount; i++)
 	{
-		if (AugmentedMatrix.Data[index][index] != 1)
+		bool AllZero = 1;
+		for (int col = 0; col < AugmentedMatrix.rowCount; col++)
 		{
-			result.Error = true;
-			return result;
+			if (AugmentedMatrix.Data[i][col] != 0)AllZero = 0;
 		}
+
+		if (AugmentedMatrix.Data[i][i] == 0 && !AllZero)
+		{
+			AugmentedMatrix.Data.insert(AugmentedMatrix.Data.begin()+i, AugmentedMatrix.Data.back());
+			AugmentedMatrix.Data.pop_back();
+			ZeroCount--;
+		}
+		if (!ZeroCount)break;
 	}
 
-	// §âx·h¨ìresult¯x°}
-	result.rowCount = AugmentedMatrix.rowCount;
-	result.colCount = 1;
 
-	for (int row = 0; row < result.rowCount; row++)
+
+	for (int row = 0; row < AugmentedMatrix.rowCount; row++)
 	{
 		std::vector<double> temp;
-		temp.push_back( AugmentedMatrix.Data[row][a.colCount]);
+		for (int col = 0; col < AugmentedMatrix.colCount; col++)
+		{					
+			if (row == col)
+			{
+				if (AugmentedMatrix.Data[row][col] != 1)
+					temp.push_back(1);
+				else
+					temp.push_back(0);
+			}			
+			else if(col<row)
+			{
+				temp.push_back(0);
+			}
+			else if(col==AugmentedMatrix.colCount-1)
+			{
+				temp.push_back(AugmentedMatrix.Data[row][col]);
+			}
+			else
+			{
+				temp.push_back(-AugmentedMatrix.Data[row][col]);
+			}
+		}
 		result.Data.push_back(temp);
 		temp.clear();
+	}	
+	result=result.Transpose();
+
+	for (int row = 0; row <result.Data.size(); row++)
+	{
+		bool Allzero = 1;
+		for(int col=0;col<result.colCount;col++)
+		{
+			if (result.Data[row][col] != 0)Allzero = 0;
+		}
+		if (Allzero)
+		{
+			result.Data.erase(result.Data.begin()+row);
+			row--;
+		}
 	}
+	result.rowCount = result.Data.size();
+	result.colCount = result.Data[0].size();
 
 	return result;
 }
@@ -529,7 +574,7 @@ double f(double x,double a, double b, double c, double d)
 }
 std::vector<double> solveEquation(double a, double b, double c, double d)
 {			
-		std::vector<double> x{ 0,0,0 };
+		std::vector<double> x;
 		int t = -1;
 		int i = 0;
 		double u=0, v = 0;
@@ -542,7 +587,7 @@ std::vector<double> solveEquation(double a, double b, double c, double d)
 			{
 				t++;
 				if (fabs(f(u,a,b,c,d))<0.00001)
-					x[t] = u;
+					x.push_back( u);
 				else
 				{
 					while ((u + 0.001<v) && fabs(f((u + v) / 2,a,b,c,d)) >= 0.00001)
@@ -598,56 +643,83 @@ Matrix Matrix::eigen()
 			return result;
 		}
 
-		double eigenValue1 = (-b + std::pow(delta,0.5)) / (2 * a);
-		double eigenValue2 = (-b - std::pow(delta, 0.5)) / (2 * a);
-		//-----------------------------------------------------------------------sovle ax=0
-		Matrix temp1 = *this;
-		Matrix temp2 = *this;
-
+		std::vector<double> values;
+		values.push_back((-b + std::pow(delta, 0.5)) / (2 * a));
+		values.push_back((-b - std::pow(delta, 0.5)) / (2 * a));
+		//-----------------------------------------------------------------------sovle ax=0		
 		//create 0
 		Matrix allZeroMatrix;
 		allZeroMatrix.rowCount = rowCount;
 		allZeroMatrix.colCount = 1;
-		
-		allZeroMatrix.Data.push_back(std::vector<double>{0});
-		allZeroMatrix.Data.push_back(std::vector<double>{0});
-		
-		temp1.Data[0][0] -= eigenValue1;
-		temp1.Data[1][1] -= eigenValue1;
-		temp1=temp1.RowReduction();
+		allZeroMatrix.Data = std::vector<std::vector<double>>{ {0,0},{0,0}};
 
-
-		temp2.Data[0][0] -= eigenValue2;
-		temp2.Data[1][1] -= eigenValue2;
-		temp2 = temp2.RowReduction();
-		//----------------------------------------------------------------------
-		double length = 0;
-		for (int i = 0; i < 2; i++)
+		Matrix eigenVectors;
+		Matrix eigenValues;
+		for (int index = 0, valueCount = 0, valuecount; index < values.size(); index++)
 		{
-			if (!i)length = 0;
-			for (int row = 0; row < result.colCount; row++)
+			Matrix temp = *this;
+			temp.Data[0][0] -= values[index];
+			temp.Data[1][1] -= values[index];	
+
+			Matrix tempEigenVector;
+			tempEigenVector = SolveLinarSystem(temp, allZeroMatrix);
+
+			// push_back eigenvector
+			for (int i = 0; i < tempEigenVector.Data.size(); i++)
 			{
-				if (!i)length += powl(temp1.Data[0][row], 2);
-				else temp1.Data[0][row] /= powl(length, 1.0 / 2);
+				std::vector<double> temp;
+				for (int c = 0; c < valueCount; c++)
+				{
+					temp.push_back(0);
+				}
+				temp.push_back(values[index]);
+				valueCount++;
+				for (int c = valueCount; c < tempEigenVector.colCount; c++)
+				{
+					temp.push_back(0);
+				}
+				eigenValues.Data.push_back(temp);
+				temp.clear();
+			}
+
+			//push_back eigenvalue
+			for (std::vector<double> v : tempEigenVector.Data)
+			{
+				eigenVectors.Data.push_back(v);
+			}
+		}
+		eigenVectors.rowCount = eigenVectors.Data.size();
+		eigenVectors.colCount = eigenVectors.Data[0].size();
+		//------------------------------------------------------------------------	
+		for (int row = 0; row < 2; row++)
+		{
+			for (int type = 0; type < 2; type++)
+			{
+				double length;
+				if (!type)length = 0;
+				for (int index = 0; index < 2; index++)
+				{
+					if (!type) length += powl(eigenVectors.Data[row][index], 2);
+					if (type)eigenVectors.Data[row][index] /= powl(length, 1.0 / 2);
+
+				}
 			}
 		}
 
-		for (int i = 0; i < 2; i++)
-		{	
-			if (!i)length = 0;
-			for (int row = 0; row < result.colCount; row++)
-			{				
-				if (!i)length += powl(temp2.Data[0][row],2);
-				else temp2.Data[0][row] /= powl(length,1.0/2);
+		eigenVectors = eigenVectors.Transpose();
 
-			}
-		}
-		//-----------------------------------------------------------------------------
-		result.Data.push_back(std::vector<double>{temp1.Data[0][1],temp2.Data[0][1]});
-		result.Data.push_back(std::vector<double>{-temp1.Data[0][0],-temp2.Data[0][0]});
-		result.Data.push_back(std::vector<double>{eigenValue1, 0});
-		result.Data.push_back(std::vector<double>{0, eigenValue2});		
-		
+		result.Data.push_back(std::vector<double>(eigenVectors.Data[0]));
+		result.Data.push_back(std::vector<double>(eigenVectors.Data[1]));
+
+		result.Data.push_back(std::vector<double>(eigenValues.Data[0]));
+		result.Data.push_back(std::vector<double>(eigenValues.Data[1]));
+
+		//----------------------------------------------------------------------
+		result.rowCount = 4;
+		result.colCount = 2;
+
+
+
 		return result;
 	}
 	else if (rowCount == 3)
@@ -656,7 +728,7 @@ Matrix Matrix::eigen()
 		1-x 2 3
 		4 5-x 6
 		7 8  9-x
-	
+
 		(1-x)(5-x)(9-x)+2*6*7+3*4*8-((1-x)*6*8+(5-x)*3*7+(9-x)*2*4)
 		=(-x)^3+(1+5+9)x^2-(9*5+9*1+5*1)x+1*5*9-(1*6*8-6*8x+5*3*7-3*7x+9*2*4-2*4x)
 		=(-x)^3+(1+5+9)x^2-(9*5+9*1+5*1+6*8+3*7+2*4)x+1*5*9++2*6*7+3*4*8-1*6*8-5*3*7-9*2*4
@@ -665,19 +737,18 @@ Matrix Matrix::eigen()
 		result.colCount = 3;
 		//-----------------------------------------------------------------------count eigen value
 		double a = -1;
-		double b =Data[0][0]+Data[1][1]+Data[2][2];
-		double c = -(Data[2][2]*Data[1][1]+Data[2][2]*Data[0][0]+ Data[0][0] * Data[1][1] - Data[1][2] * Data[2][1] \
-					- Data[0][2] * Data[2][0] - Data[0][1] * Data[1][0]);
-		double d =Data[0][0]*Data[1][1]*Data[2][2]+ Data[0][1] * Data[1][2] * Data[2][0] + Data[0][2] * Data[1][0] * Data[2][1] \
-			- Data[0][0] * Data[1][2] * Data[2][1]-	Data[1][1] * Data[0][2] * Data[2][0]- Data[2][2] * Data[0][1] * Data[1][0];
+		double b = Data[0][0] + Data[1][1] + Data[2][2];
+		double c = -(Data[2][2] * Data[1][1] + Data[2][2] * Data[0][0] + Data[0][0] * Data[1][1] - Data[1][2] * Data[2][1] \
+			- Data[0][2] * Data[2][0] - Data[0][1] * Data[1][0]);
+		double d = Data[0][0] * Data[1][1] * Data[2][2] + Data[0][1] * Data[1][2] * Data[2][0] + Data[0][2] * Data[1][0] * Data[2][1] \
+			- Data[0][0] * Data[1][2] * Data[2][1] - Data[1][1] * Data[0][2] * Data[2][0] - Data[2][2] * Data[0][1] * Data[1][0];
 
-		std::vector<double> eigenValues;
+		std::vector<double> values;
 
-		eigenValues=solveEquation(a, b, c, d);
+		values = solveEquation(a, b, c, d);
 		//-----------------------------------------------------------------------sovle ax=0
-		std::vector<Matrix> temps{*this,*this, *this};
-		
-		//create 0
+
+		//create 0 Matrix
 		Matrix allZeroMatrix;
 		allZeroMatrix.rowCount = rowCount;
 		allZeroMatrix.colCount = 1;
@@ -686,57 +757,75 @@ Matrix Matrix::eigen()
 		allZeroMatrix.Data.push_back(std::vector<double>{0});
 		allZeroMatrix.Data.push_back(std::vector<double>{0});
 
-		for (int index = 0; index < 3; index++)
+		Matrix eigenVectors;
+		Matrix eigenValues;
+		for (int index = 0, valueCount = 0, valuecount; index < values.size(); index++)
 		{
-			temps[index].Data[0][0] -= eigenValues[index];
-			temps[index].Data[1][1] -= eigenValues[index];
-			temps[index].Data[2][2] -= eigenValues[index];
-			temps[index] = temps[index].RowReduction();
-		}			
+			Matrix temp = *this;
+			temp.Data[0][0] -= values[index];
+			temp.Data[1][1] -= values[index];
+			temp.Data[2][2] -= values[index];
 
-		for (int index = 0; index < 3; index++)
-		{
+			Matrix tempEigenVector;
+			tempEigenVector = SolveLinarSystem(temp, allZeroMatrix);
 
-			std::vector<double> temp;
-			for (int i = 0; i < 3; i++)
+			// push_back eigenvector
+			for (int i = 0; i < tempEigenVector.Data.size(); i++)
 			{
-				if ((index == temps[i].colCount - 1)&&temps[i].Data[index][index]==1)
+				std::vector<double> temp;
+				for (int c = 0; c < valueCount; c++)
 				{
-					temp.push_back(0.0);
+					temp.push_back(0);
 				}
-				else if (EQUALZERO(temps[i].Data[index][index]))
+				temp.push_back(values[index]);
+				valueCount++;
+				for (int c = valueCount; c < tempEigenVector.colCount; c++)
 				{
-					temp.push_back(1.0);
+					temp.push_back(0);
 				}
-				else
-				{
-					temp.push_back(-temps[i].Data[index][2]);
-				}			
-			}	
-			result.Data.push_back(temp);
-			temp.clear();
+				eigenValues.Data.push_back(temp);
+				temp.clear();
+			}
+
+			//push_back eigenvalue
+			for (std::vector<double> v : tempEigenVector.Data)
+			{
+				eigenVectors.Data.push_back(v);
+			}
 		}
+		eigenVectors.rowCount = eigenVectors.Data.size();
+		eigenVectors.colCount = eigenVectors.Data[0].size();
 
-
-
-		for (int i = 0; i < 3; i++)
+		for (int row = 0; row < 3; row++)
 		{
-			double length = 0;
-			for (int j = 0; j < 2; j++)
+			for (int type = 0; type < 2; type++)
 			{
-				if (!j)length = 0;
+				double length;
+				if (!type)length = 0;
 				for (int index = 0; index < 3; index++)
 				{
-					if (!j)length += powl(result.Data[index][i], 2);
-					else result.Data[index][i] /= powl(length, 1.0 / 2);
+					if (!type) length += powl(eigenVectors.Data[row][index], 2);
+					if (type)eigenVectors.Data[row][index] /= powl(length, 1.0 / 2);
+
 				}
 			}
 		}
+				
+		eigenVectors = eigenVectors.Transpose();
+		
+		result.Data.push_back(std::vector<double>(eigenVectors.Data[0]));
+		result.Data.push_back(std::vector<double>(eigenVectors.Data[1]));
+		result.Data.push_back(std::vector<double>(eigenVectors.Data[2]));
 
-		//----------------------------------------------------------------------		
-		result.Data.push_back(std::vector<double>{eigenValues[0],0,0});
-		result.Data.push_back(std::vector<double>{0, eigenValues[1],0});
-		result.Data.push_back(std::vector<double>{0, 0, eigenValues[2]});
+		result.Data.push_back(std::vector<double>(eigenValues.Data[0]));
+		result.Data.push_back(std::vector<double>(eigenValues.Data[1]));
+		result.Data.push_back(std::vector<double>(eigenValues.Data[2]));
+
+		//----------------------------------------------------------------------
+		result.rowCount = 6;
+		result.colCount = 3;
+
+		
 
 		return result;
 	}
